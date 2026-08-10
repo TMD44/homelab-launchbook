@@ -1,0 +1,9 @@
+# Configuration for .github/workflows/validate-secrets.yml.
+#
+# Start with the complete built-in Gitleaks ruleset. Add only narrowly scoped
+# repository-specific rules or allowlists after reviewing real scan results.
+
+title = "Homelab Launchbook secret scanning"
+
+[extend]
+useDefault = true
