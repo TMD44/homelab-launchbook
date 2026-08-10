@@ -1,0 +1,81 @@
+name: Validate Spelling
+
+on:
+  pull_request:
+    branches:
+      - master
+
+  push:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-spelling-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-spelling:
+    name: Validate Documentation Spelling
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check documentation spelling
+        id: spell-check
+        uses: streetsidesoftware/cspell-action@de2a73e963e7443969755b648a1008f77033c5b2 # v8.4.0
+        with:
+          config: ".github/actions/validate-spelling/cspell.json"
+          files: "**/*.md"
+          check_dot_files: true
+          incremental_files_only: false
+          inline: error
+          suggestions: true
+          strict: true
+          verbose: false
+          report: all
+
+      - name: Write spelling summary
+        if: always()
+        shell: bash
+        env:
+          SUCCESS: ${{ steps.spell-check.outputs.success }}
+          FILES_CHECKED: ${{ steps.spell-check.outputs.number_of_files_checked }}
+          ISSUE_COUNT: ${{ steps.spell-check.outputs.number_of_issues }}
+          FILES_WITH_ISSUES: ${{ steps.spell-check.outputs.number_of_files_with_issues }}
+          FILES_WITH_ISSUES_JSON: ${{ steps.spell-check.outputs.files_with_issues }}
+        run: |
+          {
+            echo "## Spelling validation"
+            echo
+            echo "| Metric | Result |"
+            echo "| --- | ---: |"
+            echo "| Files checked | ${FILES_CHECKED:-Unavailable} |"
+            echo "| Spelling issues | ${ISSUE_COUNT:-Unavailable} |"
+            echo "| Files with issues | ${FILES_WITH_ISSUES:-Unavailable} |"
+            echo
+
+            if [[ "$SUCCESS" == "true" ]]; then
+              echo "✅ No spelling issues were detected."
+            elif [[ "$SUCCESS" == "false" ]]; then
+              echo "❌ Spelling issues were detected. Review the workflow annotations for word-level details."
+
+              if jq -e 'type == "array" and length > 0' <<< "${FILES_WITH_ISSUES_JSON:-[]}" > /dev/null 2>&1; then
+                echo
+                echo "### Files with issues"
+                echo
+                jq --raw-output '.[] | "- `" + . + "`"' <<< "$FILES_WITH_ISSUES_JSON"
+              fi
+            else
+              echo "⚠️ The spell checker did not return a result."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
