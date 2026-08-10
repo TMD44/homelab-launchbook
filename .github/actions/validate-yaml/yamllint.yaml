@@ -1,0 +1,34 @@
+# yamllint configuration used by validate-yaml.yml.
+#
+# Docker Compose files and GitHub Actions workflows have dedicated semantic
+# validators, so this validator focuses on the repository's remaining YAML.
+
+extends: default
+
+ignore: |
+  /.github/workflows/
+  **/*-compose.yaml
+  **/*-compose.yml
+
+rules:
+  # Repository YAML files do not use explicit `---` document markers.
+  document-start: disable
+
+  # Long URLs, image references, and configuration values are common here.
+  line-length: disable
+
+  # Permit commented-out configuration such as `#period: 30` while still
+  # checking spacing between inline comments and preceding content.
+  comments:
+    require-starting-space: false
+    min-spaces-from-content: 1
+
+  # Comment indentation is intentionally flexible in configuration examples.
+  comments-indentation: disable
+
+  # Avoid YAML 1.1 truthy aliases while allowing normal true/false values.
+  truthy:
+    allowed-values:
+      - "true"
+      - "false"
+    check-keys: false

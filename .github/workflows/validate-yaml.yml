@@ -1,0 +1,122 @@
+name: Validate YAML
+
+on:
+  pull_request:
+    branches:
+      - master
+
+  push:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-yaml-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-yaml:
+    name: Validate General YAML Syntax & Formatting
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      YAMLLINT_VERSION: "1.38.0"
+      PYYAML_VERSION: "6.0.3"
+      PATHSPEC_VERSION: "1.1.1"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Install yamllint
+        run: |
+          python -m pip install \
+            --disable-pip-version-check \
+            --no-deps \
+            --only-binary=:all: \
+            "PyYAML==${PYYAML_VERSION}" \
+            "pathspec==${PATHSPEC_VERSION}" \
+            "yamllint==${YAMLLINT_VERSION}"
+
+      - name: Verify yamllint version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          installed_version="$(yamllint --version | awk '{ print $2 }')"
+
+          if [[ "$installed_version" != "$YAMLLINT_VERSION" ]]; then
+            echo "::error::Expected yamllint ${YAMLLINT_VERSION}, but found ${installed_version}."
+            exit 1
+          fi
+
+          echo "Using yamllint ${installed_version}."
+
+      - name: Lint general YAML files
+        id: yaml-lint
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+
+          yamllint \
+            --config-file .github/actions/validate-yaml/yamllint.yaml \
+            --format github \
+            . 2>&1 | tee yamllint-results.log
+
+      - name: Write YAML validation summary
+        if: always()
+        shell: bash
+        env:
+          LINT_OUTCOME: ${{ steps.yaml-lint.outcome }}
+        run: |
+          {
+            echo "## YAML validation"
+            echo
+            echo "- **yamllint:** \`${YAMLLINT_VERSION}\`"
+            echo "- **Scope:** General YAML files"
+            echo "- **Lint:** ${LINT_OUTCOME}"
+            echo
+
+            if [[ "$LINT_OUTCOME" == "success" ]]; then
+              echo "✅ All in-scope YAML files passed validation."
+            else
+              echo "❌ YAML validation issues were detected."
+
+              if [[ -s "yamllint-results.log" ]]; then
+                echo
+                echo "### Findings"
+                echo
+                echo '```text'
+                grep -E '^::(error|warning) ' "yamllint-results.log" || true
+                echo '```'
+              fi
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Enforce YAML validation
+        if: always()
+        shell: bash
+        env:
+          LINT_OUTCOME: ${{ steps.yaml-lint.outcome }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$LINT_OUTCOME" != "success" ]]; then
+            echo "::error::YAML validation failed."
+            exit 1
+          fi
+
+          echo "All in-scope YAML files passed validation."
