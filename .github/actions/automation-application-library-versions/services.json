@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "defaults": {
+    "docker_release_check_limit": 25,
+    "docker_tag_templates": [
+      "{github_tag}",
+      "{version}",
+      "v{version}"
+    ],
+    "ignored_tags": [
+      "latest",
+      "stable",
+      "edge",
+      "nightly",
+      "develop",
+      "development",
+      "dev",
+      "testing",
+      "test",
+      "beta",
+      "alpha",
+      "preview",
+      "canary",
+      "unstable"
+    ],
+    "version_patterns": {
+      "current": "^v?(?P<version>\\d+\\.\\d+\\.\\d+(?:\\.\\d+)?)$",
+      "github": "^v?(?P<version>\\d+(?:\\.\\d+){1,3})$",
+      "docker": "^v?(?P<version>\\d+(?:\\.\\d+){1,3})$"
+    }
+  },
+  "services": [
+    {
+      "name": "AdGuard Home",
+      "category": "DNS Servers",
+      "enabled": true,
+      "compose_file": "Application Library/DNS Servers/AdGuard Home/adguardhome-compose.yaml",
+      "env_files": [
+        "Application Library/DNS Servers/AdGuard Home/adguardhome.env"
+      ],
+      "compose_service": "adguard-home",
+      "image": "adguard/adguardhome",
+      "github_repository": "AdguardTeam/AdGuardHome",
+      "docker_hub_repository": "adguard/adguardhome",
+      "ignored_tags": []
+    },
+    {
+      "name": "Beszel",
+      "category": "Monitoring Tools",
+      "enabled": true,
+      "compose_file": "Application Library/Monitoring Tools/Beszel/beszel-compose.yaml",
+      "env_files": [],
+      "compose_service": "beszel",
+      "image": "henrygd/beszel",
+      "github_repository": "henrygd/beszel",
+      "docker_hub_repository": "henrygd/beszel",
+      "ignored_tags": []
+    },
+    {
+      "name": "Cloudflared",
+      "category": "VPNs & Tunnels",
+      "enabled": true,
+      "compose_file": "Application Library/VPNs & Tunnels/Cloudflared/cloudflared-compose.yaml",
+      "env_files": [
+        "Application Library/VPNs & Tunnels/Cloudflared/cloudflared.env"
+      ],
+      "compose_service": "cloudflared",
+      "image": "cloudflare/cloudflared",
+      "github_repository": "cloudflare/cloudflared",
+      "docker_hub_repository": "cloudflare/cloudflared",
+      "ignored_tags": []
+    },
+    {
+      "name": "Gitea",
+      "category": "Git Hosting",
+      "enabled": true,
+      "compose_file": "Application Library/Git Hosting/Gitea/gitea-compose.yaml",
+      "env_files": [
+        "Application Library/Git Hosting/Gitea/gitea.env"
+      ],
+      "compose_service": "server",
+      "image": "gitea/gitea",
+      "github_repository": "go-gitea/gitea",
+      "docker_hub_repository": "gitea/gitea",
+      "ignored_tags": []
+    },
+    {
+      "name": "Gotify",
+      "category": "Notifications & Alerting",
+      "enabled": true,
+      "compose_file": "Application Library/Notifications & Alerting/Gotify/gotify-compose.yaml",
+      "env_files": [
+        "Application Library/Notifications & Alerting/Gotify/gotify.env"
+      ],
+      "compose_service": "gotify",
+      "image": "gotify/server",
+      "github_repository": "gotify/server",
+      "docker_hub_repository": "gotify/server",
+      "ignored_tags": []
+    },
+    {
+      "name": "MySpeed",
+      "category": "Monitoring Tools",
+      "enabled": true,
+      "compose_file": "Application Library/Monitoring Tools/MySpeed/myspeed-compose.yaml",
+      "env_files": [],
+      "compose_service": "myspeed",
+      "image": "germannewsmaker/myspeed",
+      "github_repository": "gnmyt/myspeed",
+      "docker_hub_repository": "germannewsmaker/myspeed",
+      "ignored_tags": []
+    },
+    {
+      "name": "Nextcloud",
+      "category": "Cloud Storage",
+      "enabled": true,
+      "compose_file": "Application Library/Cloud Storage/Nextcloud/nextcloud-compose.yaml",
+      "env_files": [
+        "Application Library/Cloud Storage/Nextcloud/nextcloud.env"
+      ],
+      "compose_service": "nextcloud",
+      "image": "nextcloud",
+      "github_repository": "nextcloud/server",
+      "docker_hub_repository": "library/nextcloud",
+      "ignored_tags": []
+    },
+    {
+      "name": "Omnitools",
+      "category": "Utilities",
+      "enabled": true,
+      "compose_file": "Application Library/Utilities/Omnitools/omnitools-compose.yaml",
+      "env_files": [],
+      "compose_service": "omni-tools",
+      "image": "iib0011/omni-tools",
+      "github_repository": "iib0011/omni-tools",
+      "docker_hub_repository": "iib0011/omni-tools",
+      "ignored_tags": []
+    },
+    {
+      "name": "stremio-ncore-addon",
+      "category": "Media Streaming",
+      "enabled": true,
+      "compose_file": "Application Library/Media Streaming/stremio-ncore-addon/stremio-ncore-addon-compose.yaml",
+      "env_files": [
+        "Application Library/Media Streaming/stremio-ncore-addon/stremio-ncore-addon.env"
+      ],
+      "compose_service": "stremio-ncore-addon",
+      "image": "detarkende/stremio-ncore-addon",
+      "github_repository": "detarkende/stremio-ncore-addon",
+      "docker_hub_repository": "detarkende/stremio-ncore-addon",
+      "ignored_tags": []
+    },
+    {
+      "name": "Traefik",
+      "category": "Reverse Proxies",
+      "enabled": true,
+      "compose_file": "Application Library/Reverse Proxies/Traefik/traefik-compose.yaml",
+      "env_files": [
+        "Application Library/Reverse Proxies/Traefik/traefik.env"
+      ],
+      "compose_service": "traefik",
+      "image": "traefik",
+      "github_repository": "traefik/traefik",
+      "docker_hub_repository": "library/traefik",
+      "ignored_tags": []
+    },
+    {
+      "name": "Uptime Kuma",
+      "category": "Monitoring Tools",
+      "enabled": true,
+      "compose_file": "Application Library/Monitoring Tools/Uptime-kuma/uptime-kuma-compose.yaml",
+      "env_files": [],
+      "compose_service": "uptime-kuma",
+      "image": "louislam/uptime-kuma",
+      "github_repository": "louislam/uptime-kuma",
+      "docker_hub_repository": "louislam/uptime-kuma",
+      "ignored_tags": []
+    }
+  ]
+}

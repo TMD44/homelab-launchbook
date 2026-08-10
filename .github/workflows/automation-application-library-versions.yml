@@ -1,0 +1,179 @@
+name: "Automation: Application Library Versions"
+
+on:
+  schedule:
+    - cron: "17 4 * * 0"
+      timezone: "Europe/Budapest"
+
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: automation-application-library-versions
+  cancel-in-progress: false
+
+jobs:
+  update-application-library-versions:
+    name: Update Application Library Versions
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYYAML_VERSION: "6.0.3"
+      PYYAML_SHA256: "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6"
+      PACKAGING_VERSION: "26.3"
+      PACKAGING_SHA256: "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c"
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Verify automation token
+        shell: bash
+        env:
+          AUTOMATION_TOKEN: ${{ secrets.AUTOMATION_APPLICATION_LIBRARY_VERSIONS_TOKEN }}
+        run: |
+          if [[ -z "$AUTOMATION_TOKEN" ]]; then
+            echo "::error::Missing required repository secret AUTOMATION_APPLICATION_LIBRARY_VERSIONS_TOKEN."
+            echo "::error::Use a fine-grained personal access token so the automation PR can trigger pull-request validators."
+            exit 1
+          fi
+
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/application-library-versions-requirements.txt" <<EOF
+          PyYAML==${PYYAML_VERSION} --hash=sha256:${PYYAML_SHA256}
+          packaging==${PACKAGING_VERSION} --hash=sha256:${PACKAGING_SHA256}
+          EOF
+
+          python -m pip install \
+            --disable-pip-version-check \
+            --no-deps \
+            --only-binary=:all: \
+            --require-hashes \
+            --requirement "$RUNNER_TEMP/application-library-versions-requirements.txt"
+
+      - name: Validate service configuration
+        run: |
+          python .github/actions/automation-application-library-versions/application-library-versions.py \
+            --validate-only
+
+      - name: Capture Application Library README baseline
+        shell: bash
+        run: |
+          git show HEAD:"Application Library/README.md" > \
+            "$RUNNER_TEMP/application-library-readme-before.md"
+
+      - name: Update Application Library Versions section
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python .github/actions/automation-application-library-versions/application-library-versions.py
+
+      - name: Verify Versions-section-only changes
+        shell: bash
+        run: |
+          allowed_path="Application Library/README.md"
+
+          mapfile -t changed_files < <(
+            {
+              git diff --name-only
+              git diff --cached --name-only
+              git ls-files --others --exclude-standard
+            } | sort -u
+          )
+
+          unexpected_changes=()
+
+          for path in "${changed_files[@]}"; do
+            [[ -z "$path" ]] && continue
+
+            if [[ "$path" != "$allowed_path" ]]; then
+              unexpected_changes+=("$path")
+            fi
+          done
+
+          if (( ${#unexpected_changes[@]} > 0 )); then
+            echo "::error::Unexpected repository changes were detected:"
+
+            for path in "${unexpected_changes[@]}"; do
+              echo "  - $path"
+            done
+
+            exit 1
+          fi
+
+          if printf '%s\n' "${changed_files[@]}" | grep -Fxq "$allowed_path"; then
+            echo "Verified: only $allowed_path was modified."
+          else
+            echo "No repository changes were generated."
+          fi
+
+          python .github/actions/automation-application-library-versions/application-library-versions.py \
+            --verify-section-only \
+            --baseline "$RUNNER_TEMP/application-library-readme-before.md"
+
+      - name: Create or update Application Library Versions PR
+        id: application-library-versions-pr
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ secrets.AUTOMATION_APPLICATION_LIBRARY_VERSIONS_TOKEN }}
+          branch: automation/application-library-versions
+          base: master
+          delete-branch: true
+
+          add-paths: |
+            Application Library/README.md
+
+          commit-message: "Automation: Update Application Library Versions"
+          title: "Automation: Update Application Library Versions"
+
+          body: |
+            This pull request was automatically created by GitHub Actions to update only the generated `## Versions` section in `Application Library/README.md`.
+
+            It compares the configured service versions with stable GitHub Releases and matching Docker Hub tags, helping identify outdated, unpinned, or unverifiable versions.
+
+          labels: |
+            application-library-versions
+
+      - name: Approve Application Library Versions PR
+        if: ${{ steps.application-library-versions-pr.outputs.pull-request-number }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.application-library-versions-pr.outputs.pull-request-number }}
+        run: |
+          gh pr review "$PR_NUMBER" \
+            --repo "$GITHUB_REPOSITORY" \
+            --approve
+
+      - name: Enable auto-merge for Application Library Versions PR
+        if: ${{ steps.application-library-versions-pr.outputs.pull-request-number }}
+        env:
+          GH_TOKEN: ${{ secrets.AUTOMATION_APPLICATION_LIBRARY_VERSIONS_TOKEN }}
+          PR_NUMBER: ${{ steps.application-library-versions-pr.outputs.pull-request-number }}
+        run: |
+          cat > /tmp/squash-commit-body.txt <<'EOF'
+          Automatically created by GitHub Actions to update the Application Library README Versions section.
+
+          Co-authored-by: TMD44 <39030834+TMD44@users.noreply.github.com>
+          EOF
+
+          gh pr merge "$PR_NUMBER" \
+            --repo "$GITHUB_REPOSITORY" \
+            --auto \
+            --squash \
+            --delete-branch \
+            --subject "Automation: Update Application Library Versions (#${PR_NUMBER})" \
+            --body-file /tmp/squash-commit-body.txt
