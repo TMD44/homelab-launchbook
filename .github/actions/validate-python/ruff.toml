@@ -1,0 +1,26 @@
+# Ruff configuration used by validate-python.yml.
+#
+# Keep the lint rules focused on correctness and common programming mistakes.
+# Formatting is enforced separately by `ruff format --check`.
+
+target-version = "py313"
+line-length = 88
+respect-gitignore = true
+
+[lint]
+select = [
+  "E4", # Import and whitespace-related pycodestyle errors.
+  "E7", # Statement-related pycodestyle errors.
+  "E9", # Runtime and parser-related pycodestyle errors.
+  "F",  # Pyflakes: undefined names, unused imports, and related defects.
+  "B",  # flake8-bugbear: likely bugs and fragile constructs.
+]
+
+[format]
+# Keep validate-python scoped to Python files; Markdown has its own validator.
+exclude = ["*.md"]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = false
