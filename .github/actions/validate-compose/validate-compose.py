@@ -4,7 +4,8 @@
 Matching `<name>.env` files receive lightweight linting before Docker Compose
 validates the resolved configuration with `docker compose config --quiet`. The
 validator never pulls images, builds services, starts containers, or modifies
-repository configuration.
+repository configuration. With `--allow-empty`, an Application Library that does
+not exist yet, or contains no matching Compose files, is an explicit no-op.
 """
 
 from __future__ import annotations
@@ -92,6 +93,14 @@ def parse_arguments() -> argparse.Namespace:
         help=(
             "Markdown report path, relative to the repository root unless an "
             "absolute path is supplied."
+        ),
+    )
+    parser.add_argument(
+        "--allow-empty",
+        action="store_true",
+        help=(
+            "Succeed when the Application Library is absent or contains no "
+            "matching Compose files."
         ),
     )
     return parser.parse_args()
@@ -391,6 +400,18 @@ def render_report(
         )
         return "\n".join(lines)
 
+    if not results:
+        lines.extend(
+            (
+                "- **Result:** ✅ No Compose files to validate",
+                "",
+                "The Application Library is absent or contains no files matching "
+                "`*-compose.yaml` or `*-compose.yml`.",
+                "",
+            )
+        )
+        return "\n".join(lines).rstrip() + "\n"
+
     valid_count = sum(result.is_valid and not result.has_warnings for result in results)
     warning_count = sum(result.has_warnings for result in results)
     invalid_count = sum(not result.is_valid for result in results)
@@ -542,17 +563,23 @@ def main() -> int:
 
     if not repository_root.is_dir():
         fatal_error = f"Repository root does not exist: {repository_root}"
-    elif not application_library.is_dir():
+    elif application_library.exists() and not application_library.is_dir():
         fatal_error = (
-            f"Application Library directory does not exist: {application_library}"
+            f"Application Library path is not a directory: {application_library}"
         )
-    else:
+    elif application_library.is_dir():
         compose_files = discover_compose_files(application_library)
         if not compose_files:
-            fatal_error = (
-                "No files matching `*-compose.yaml` or `*-compose.yml` "
-                "were found under the Application Library."
-            )
+            if arguments.allow_empty:
+                print(
+                    "No files matching `*-compose.yaml` or `*-compose.yml` were "
+                    "found under the Application Library; nothing to validate."
+                )
+            else:
+                fatal_error = (
+                    "No files matching `*-compose.yaml` or `*-compose.yml` "
+                    "were found under the Application Library."
+                )
         else:
             for compose_file in compose_files:
                 service_env_file = discover_service_env_file(compose_file)
@@ -577,6 +604,15 @@ def main() -> int:
                     print(f"VALID WITH WARNINGS: {relative_path}")
                 else:
                     print(f"VALID: {relative_path}")
+    elif arguments.allow_empty:
+        print(
+            "Application Library directory does not exist; "
+            "no Compose files to validate."
+        )
+    else:
+        fatal_error = (
+            f"Application Library directory does not exist: {application_library}"
+        )
 
     report = render_report(
         repository_root,

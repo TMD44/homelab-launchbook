@@ -58,6 +58,7 @@ jobs:
         run: >-
           python
           .github/actions/validate-compose/validate-compose.py
+          --allow-empty
           --report compose-validation-report.md
 
       - name: Upload Compose report

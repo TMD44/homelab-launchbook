@@ -148,7 +148,6 @@
   },
 
   "search.exclude": {
-    "**/_UNTRACKED": true,
     "**/.git": true
   }
 }
