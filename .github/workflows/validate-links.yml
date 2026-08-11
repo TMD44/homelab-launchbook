@@ -1,0 +1,111 @@
+name: Validate Links
+
+on:
+  pull_request:
+    branches:
+      - master
+
+  push:
+    branches:
+      - master
+
+  schedule:
+    - cron: "17 5 1 * *"
+      timezone: "Europe/Budapest"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-links-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-links:
+    name: Validate Documentation Links
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Restore link-check cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .lycheecache
+          key: lychee-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            lychee-${{ runner.os }}-
+
+      - name: Check documentation links
+        id: link-check
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --config .github/actions/validate-links/lychee.toml
+            --root-dir .
+            './**/*.md'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          format: markdown
+          output: documentation-link-report.md
+          jobSummary: true
+          fail: false
+          failIfEmpty: true
+
+      - name: Ensure link report exists
+        if: always()
+        shell: bash
+        run: touch documentation-link-report.md
+
+      - name: Save link-check cache
+        if: always() && hashFiles('.lycheecache') != ''
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .lycheecache
+          key: lychee-${{ runner.os }}-${{ github.run_id }}
+
+      - name: Upload link-validation report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: documentation-link-report
+          path: documentation-link-report.md
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Enforce link-check result
+        if: always()
+        shell: bash
+        env:
+          LYCHEE_EXIT_CODE: ${{ steps.link-check.outputs.exit_code }}
+        run: |
+          case "$LYCHEE_EXIT_CODE" in
+            0)
+              echo "No broken links were detected."
+              ;;
+            1)
+              echo "::error::Lychee encountered an input or runtime error. Check the job summary and uploaded link-validation report for details."
+              exit 1
+              ;;
+            2)
+              echo "::error::Broken or invalid documentation links were detected. Check the job summary and uploaded link-validation report for details."
+              exit 1
+              ;;
+            3)
+              echo "::error::Lychee encountered a configuration error. Check the job summary and uploaded link-validation report for details."
+              exit 1
+              ;;
+            "")
+              echo "::error::Lychee did not return an exit code. Check the preceding workflow logs for details."
+              exit 1
+              ;;
+            *)
+              echo "::error::Lychee returned an unexpected exit code: $LYCHEE_EXIT_CODE. Check the preceding workflow logs for details."
+              exit 1
+              ;;
+          esac

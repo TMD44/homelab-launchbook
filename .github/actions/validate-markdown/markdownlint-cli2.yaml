@@ -1,0 +1,38 @@
+# Markdownlint rule configuration used by validate-markdown.yml.
+# This file is passed through markdownlint-cli2-action's `config` input,
+# so it contains the Markdownlint rule object directly.
+
+default: true
+
+# Long paths, commands, URLs, and Markdown tables are common in this repository.
+MD013: false
+
+# Allow repeated headings under different parent sections, but not as siblings.
+MD024:
+  siblings_only: true
+
+# Require sequential numbering for ordered lists.
+MD029:
+  style: ordered
+
+# Inline HTML is intentionally allowed.
+MD033: false
+
+# Allow using emphasis as headings (e.g. bolded Table of Contents).
+MD036: false
+
+# Require fenced code blocks.
+MD046:
+  style: fenced
+
+# Use asterisks for emphasis and strong emphasis.
+MD049:
+  style: asterisk
+
+MD050:
+  style: asterisk
+
+# Use compact table spacing because MD060 compact violations are auto-fixable.
+# This keeps table edits self-correcting with VS Code's save-time fixes.
+MD060:
+  style: compact

@@ -1,0 +1,7 @@
+# ShellCheck configuration used by validate-shell.yml.
+#
+# Fail CI for errors and warnings while keeping informational/style-only
+# suggestions non-blocking. Add global exclusions only for confirmed false
+# positives; prefer fixing scripts or using narrow inline directives instead.
+
+severity=warning

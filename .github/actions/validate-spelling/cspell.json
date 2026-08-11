@@ -1,0 +1,60 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "version": "0.2",
+  "language": "en-US",
+  "caseSensitive": false,
+  "allowCompoundWords": false,
+  "dictionaryDefinitions": [
+    {
+      "name": "project-words",
+      "path": "./project-words.txt",
+      "addWords": true
+    }
+  ],
+  "dictionaries": [
+    "project-words"
+  ],
+  "patterns": [
+    {
+      "name": "markdown-fenced-code-block-backticks",
+      "pattern": "/^\\s*`{3,}[^\\n]*\\n[\\s\\S]*?^\\s*`{3,}\\s*$/gm"
+    },
+    {
+      "name": "markdown-fenced-code-block-tildes",
+      "pattern": "/^\\s*~{3,}[^\\n]*\\n[\\s\\S]*?^\\s*~{3,}\\s*$/gm"
+    },
+    {
+      "name": "markdown-inline-code",
+      "pattern": "/(`+)[^\\n]*?\\1/g"
+    },
+    {
+      "name": "html-code-and-pre-blocks",
+      "pattern": "/<(code|pre)\\b[^>]*>[\\s\\S]*?<\\/\\1>/gi"
+    }
+  ],
+  "languageSettings": [
+    {
+      "languageId": "markdown",
+      "ignoreRegExpList": [
+        "Urls",
+        "Email",
+        "RsaCert",
+        "SshRsa",
+        "Base64MultiLine",
+        "Base64SingleLine",
+        "CommitHash",
+        "CommitHashLink",
+        "CStyleHexValue",
+        "CSSHexValue",
+        "SHA",
+        "HashStrings",
+        "UnicodeRef",
+        "UUID",
+        "markdown-fenced-code-block-backticks",
+        "markdown-fenced-code-block-tildes",
+        "markdown-inline-code",
+        "html-code-and-pre-blocks"
+      ]
+    }
+  ]
+}

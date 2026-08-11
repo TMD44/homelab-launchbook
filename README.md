@@ -1,2 +1,1 @@
-# homelab-launchbook
-Homelab Launchbook: The Ultimate Homelab Guide
+# **Homelab Launchbook**: The Ultimate Homelab Guide

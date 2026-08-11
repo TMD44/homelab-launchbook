@@ -1,0 +1,75 @@
+name: Validate Markdown
+
+on:
+  pull_request:
+    branches:
+      - master
+
+  push:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-markdown-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-markdown:
+    name: Validate Markdown Formatting
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Lint Markdown files
+        id: markdown-lint
+        continue-on-error: true
+        uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff # v24.2.0
+        with:
+          config: ".github/actions/validate-markdown/markdownlint-cli2.yaml"
+          globs: "**/*.md"
+          fix: false
+
+      - name: Write Markdown validation summary
+        if: always()
+        shell: bash
+        env:
+          LINT_OUTCOME: ${{ steps.markdown-lint.outcome }}
+        run: |
+          {
+            echo "## Markdown validation"
+            echo
+            echo "- **Scope:** All Markdown files"
+            echo "- **Lint:** ${LINT_OUTCOME}"
+            echo
+
+            if [[ "$LINT_OUTCOME" == "success" ]]; then
+              echo "✅ All Markdown files passed validation."
+            else
+              echo "❌ Markdown formatting issues were detected. Review the workflow annotations for file and line details."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Enforce Markdown validation
+        if: always()
+        shell: bash
+        env:
+          LINT_OUTCOME: ${{ steps.markdown-lint.outcome }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$LINT_OUTCOME" != "success" ]]; then
+            echo "::error::Markdown validation failed."
+            exit 1
+          fi
+
+          echo "All Markdown files passed validation."

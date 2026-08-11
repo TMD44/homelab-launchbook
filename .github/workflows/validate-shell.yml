@@ -1,0 +1,205 @@
+name: Validate Shell
+
+on:
+  pull_request:
+    branches:
+      - master
+
+  push:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-shell-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-shell:
+    name: Validate Shell Scripts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      SHELLCHECK_VERSION: "0.11.0"
+      SHELLCHECK_SHA256: "8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install and verify ShellCheck
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          install_directory="$RUNNER_TEMP/validate-shell-bin"
+          download_directory="$RUNNER_TEMP/shellcheck-download"
+          archive_name="shellcheck-v${SHELLCHECK_VERSION}.linux.x86_64.tar.xz"
+          archive_path="${download_directory}/${archive_name}"
+          download_url="https://github.com/koalaman/shellcheck/releases/download/v${SHELLCHECK_VERSION}/${archive_name}"
+
+          mkdir -p "$install_directory" "$download_directory"
+
+          curl \
+            --fail \
+            --location \
+            --retry 3 \
+            --retry-all-errors \
+            --show-error \
+            --silent \
+            "$download_url" \
+            --output "$archive_path"
+
+          echo "${SHELLCHECK_SHA256}  ${archive_path}" | sha256sum --check
+
+          tar -xJf "$archive_path" -C "$download_directory"
+          install -m 0755 \
+            "${download_directory}/shellcheck-v${SHELLCHECK_VERSION}/shellcheck" \
+            "${install_directory}/shellcheck"
+
+          echo "$install_directory" >> "$GITHUB_PATH"
+
+      - name: Verify ShellCheck version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          installed_version="$(
+            shellcheck --version |
+              awk '$1 == "version:" { print $2 }'
+          )"
+
+          if [[ "$installed_version" != "$SHELLCHECK_VERSION" ]]; then
+            echo "::error::Expected ShellCheck ${SHELLCHECK_VERSION}, but found ${installed_version}."
+            exit 1
+          fi
+
+          echo "Using ShellCheck ${installed_version}."
+
+      - name: Prepare ShellCheck configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -e ".shellcheckrc" ]]; then
+            echo "::error::A root ShellCheck configuration already exists. Keep the canonical configuration at .github/actions/validate-shell/shellcheckrc."
+            exit 1
+          fi
+
+          install -m 0644 \
+            ".github/actions/validate-shell/shellcheckrc" \
+            ".shellcheckrc"
+
+      - name: Lint shell scripts
+        id: shell-lint
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          result_file="shellcheck-results.log"
+          : > "$result_file"
+
+          mapfile -d '' -t shell_files < <(
+            git ls-files -z -- \
+              '*.sh' \
+              '*.bash' \
+              '*.bats' \
+              '*.dash' \
+              '*.ksh'
+          )
+
+          if (( ${#shell_files[@]} == 0 )); then
+            echo "No tracked shell scripts were found."
+            exit 0
+          fi
+
+          echo "Validating ${#shell_files[@]} tracked shell script(s)."
+          shellcheck --format=gcc "${shell_files[@]}" 2>&1 | tee "$result_file"
+
+      - name: Write Shell validation summary
+        if: always()
+        shell: bash
+        env:
+          LINT_OUTCOME: ${{ steps.shell-lint.outcome }}
+        run: |
+          set -euo pipefail
+
+          result_file="shellcheck-results.log"
+          exec 3>&1
+
+          {
+            echo "## Shell validation"
+            echo
+            echo "- **ShellCheck:** \`${SHELLCHECK_VERSION}\`"
+            echo "- **Minimum severity:** warning"
+            echo "- **Lint:** ${LINT_OUTCOME}"
+            echo
+
+            if [[ "$LINT_OUTCOME" == "success" ]]; then
+              echo "✅ All tracked shell scripts passed validation."
+            else
+              echo "❌ Shell validation issues were detected."
+
+              if [[ -s "$result_file" ]]; then
+                echo
+                echo "### Findings"
+                echo
+
+                while IFS= read -r finding; do
+                  if [[ "$finding" =~ ^(.+):([0-9]+):([0-9]+):[[:space:]](error|warning):[[:space:]](.+)[[:space:]]\[(SC[0-9]+)\]$ ]]; then
+                    filepath="${BASH_REMATCH[1]}"
+                    line="${BASH_REMATCH[2]}"
+                    column="${BASH_REMATCH[3]}"
+                    severity="${BASH_REMATCH[4]}"
+                    message="${BASH_REMATCH[5]}"
+                    rule="${BASH_REMATCH[6]}"
+
+                    annotation_message="${message//'%'/'%25'}"
+                    annotation_message="${annotation_message//$'\r'/'%0D'}"
+                    annotation_message="${annotation_message//$'\n'/'%0A'}"
+
+                    printf \
+                      '::%s file=%s,line=%s,col=%s,title=ShellCheck (%s)::%s\n' \
+                      "$severity" \
+                      "$filepath" \
+                      "$line" \
+                      "$column" \
+                      "$rule" \
+                      "$annotation_message" >&3
+
+                    printf -- "- \`%s:%s:%s\` **%s** — %s\n" \
+                      "$filepath" \
+                      "$line" \
+                      "$column" \
+                      "$rule" \
+                      "$message"
+                  else
+                    printf -- "- \`%s\`\n" "$finding"
+                  fi
+                done < "$result_file"
+              fi
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Enforce Shell validation
+        if: always()
+        shell: bash
+        env:
+          LINT_OUTCOME: ${{ steps.shell-lint.outcome }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$LINT_OUTCOME" != "success" ]]; then
+            echo "::error::Shell validation failed."
+            exit 1
+          fi
+
+          echo "All tracked shell scripts passed validation."

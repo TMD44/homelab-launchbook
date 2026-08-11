@@ -1,0 +1,18 @@
+{
+  "recommendations": [
+    "davidanson.vscode-markdownlint",
+    "streetsidesoftware.code-spell-checker",
+    "redhat.vscode-yaml",
+    "kuscamara.yamllint-fix",
+    "github.vscode-github-actions",
+    "jimeh.actionlint",
+    "zizmor.zizmor-vscode",
+    "timonwong.shellcheck",
+    "ms-python.python",
+    "charliermarsh.ruff",
+    "tamasfe.even-better-toml",
+    "mikestead.dotenv",
+    "eamodio.gitlens",
+    "hediet.vscode-drawio"
+  ]
+}

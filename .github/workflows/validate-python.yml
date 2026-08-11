@@ -1,0 +1,135 @@
+name: Validate Python
+
+on:
+  pull_request:
+    branches:
+      - master
+
+  push:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-python-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-python:
+    name: Validate Python Syntax & Formatting
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      RUFF_VERSION: "0.16.0"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Install Ruff
+        run: |
+          python -m pip install \
+            --disable-pip-version-check \
+            --no-deps \
+            --only-binary=:all: \
+            "ruff==${RUFF_VERSION}"
+
+      - name: Verify Ruff version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          installed_version="$(ruff --version | awk '{ print $2 }')"
+
+          if [[ "$installed_version" != "$RUFF_VERSION" ]]; then
+            echo "::error::Expected Ruff ${RUFF_VERSION}, but found ${installed_version}."
+            exit 1
+          fi
+
+          echo "Using Ruff ${installed_version}."
+
+      - name: Lint Python files
+        id: python-lint
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+
+          ruff check \
+            --config .github/actions/validate-python/ruff.toml \
+            --no-cache \
+            --output-format github \
+            . 2>&1 | tee ruff-lint-results.log
+
+      - name: Check Python formatting
+        id: python-format
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+
+          ruff format \
+            --config .github/actions/validate-python/ruff.toml \
+            --no-cache \
+            --check \
+            --output-format github \
+            . 2>&1 | tee ruff-format-results.log
+
+      - name: Enforce Python validation
+        if: always()
+        shell: bash
+        env:
+          LINT_OUTCOME: ${{ steps.python-lint.outcome }}
+          FORMAT_OUTCOME: ${{ steps.python-format.outcome }}
+        run: |
+          set -euo pipefail
+
+          {
+            echo "## Python validation"
+            echo
+            echo "- **Ruff:** \`${RUFF_VERSION}\`"
+            echo "- **Lint:** ${LINT_OUTCOME}"
+            echo "- **Formatting:** ${FORMAT_OUTCOME}"
+
+            if [[ "$LINT_OUTCOME" != "success" && -s "ruff-lint-results.log" ]]; then
+              echo
+              echo "### Lint findings"
+              echo
+              echo '```text'
+              cat "ruff-lint-results.log"
+              echo '```'
+            fi
+
+            if [[ "$FORMAT_OUTCOME" != "success" && -s "ruff-format-results.log" ]]; then
+              echo
+              echo "### Formatting findings"
+              echo
+              echo '```text'
+              cat "ruff-format-results.log"
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$LINT_OUTCOME" != "success" ]]; then
+            echo "::error::Python linting failed."
+            exit 1
+          fi
+
+          if [[ "$FORMAT_OUTCOME" != "success" ]]; then
+            echo "::error::Python formatting validation failed."
+            exit 1
+          fi
+
+          echo "All Python files passed validation."

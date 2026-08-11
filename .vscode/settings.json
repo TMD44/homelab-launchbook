@@ -1,0 +1,153 @@
+{
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "files.trimFinalNewlines": true,
+  "files.insertFinalNewline": true,
+
+  "markdownlint.configFile": ".github/actions/validate-markdown/markdownlint-cli2.yaml",
+  "markdownlint.lintWorkspaceGlobs": [
+    "**/*.md"
+  ],
+  "markdownlint.run": "onType",
+  "markdownlint.severityForError": "Error",
+
+  "cSpell.enabled": true,
+  "cSpell.enabledFileTypes": {
+    "*": false,
+    "markdown": true
+  },
+  "cSpell.import": [
+    "${workspaceFolder}/.github/actions/validate-spelling/cspell.json"
+  ],
+  "cSpell.noConfigSearch": true,
+  "cSpell.useGitignore": false,
+  "cSpell.spellCheckOnlyWorkspaceFiles": true,
+  "cSpell.maxNumberOfProblems": 1000,
+  "cSpell.diagnosticLevel": "Error",
+
+  "actionlint.enable": true,
+  "actionlint.executable": "actionlint",
+  "actionlint.runTrigger": "onType",
+  "actionlint.debounceDelay": 300,
+  "actionlint.additionalArgs": [
+    "-config-file",
+    ".github/actions/validate-workflows/actionlint.yaml"
+  ],
+  "actionlint.shellcheckExecutable": "shellcheck",
+  "actionlint.pyflakesExecutable": "pyflakes",
+  "actionlint.ignoreErrors": [],
+  "actionlint.ruleSeverities": {},
+
+  "zizmor.enable": true,
+  "zizmor.executablePath": "zizmor",
+
+  "ruff.enable": true,
+  "ruff.nativeServer": "on",
+  "ruff.importStrategy": "fromEnvironment",
+  "ruff.configuration": "${workspaceFolder}/.github/actions/validate-python/ruff.toml",
+  "ruff.configurationPreference": "filesystemFirst",
+
+  "shellcheck.enable": true,
+  "shellcheck.enableQuickFix": true,
+  "shellcheck.executablePath": "shellcheck",
+  "shellcheck.run": "onType",
+  "shellcheck.useWorkspaceRootAsCwd": true,
+  "shellcheck.customArgs": [
+    "--rcfile",
+    ".github/actions/validate-shell/shellcheckrc"
+  ],
+
+  "yamlLintFix.yamllintPath": "yamllint",
+  "yamlLintFix.autoFixOnSave": false,
+  "yamlLintFix.configFile": ".github/actions/validate-yaml/yamllint.yaml",
+
+  "yaml.validate": true,
+  "yaml.hover": true,
+  "yaml.completion": true,
+  "yaml.format.enable": false,
+  "yaml.schemas": {
+    "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json": [
+      "Application Library/**/*-compose.yml",
+      "Application Library/**/*-compose.yaml"
+    ]
+  },
+
+  "[markdown]": {
+    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+    "editor.formatOnSave": true,
+    "editor.wordWrap": "on",
+    "editor.quickSuggestions": {
+      "other": "off",
+      "comments": "off",
+      "strings": "off"
+    },
+    "editor.snippetSuggestions": "inline",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.markdownlint": "always"
+    }
+  },
+
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "always"
+    }
+  },
+
+  "[yaml]": {
+    "editor.formatOnSave": false,
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.autoIndent": "advanced"
+  },
+
+  "[github-actions-workflow]": {
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.autoIndent": "advanced"
+  },
+
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.formatOnSave": true,
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.formatOnSave": true,
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+
+  "[toml]": {
+    "editor.defaultFormatter": "tamasfe.even-better-toml",
+    "editor.formatOnSave": true,
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+
+  "[shellscript]": {
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+
+  "files.associations": {
+    "*.env": "dotenv",
+    "*.env.example": "dotenv",
+    "*.env.template": "dotenv",
+    "*.env.*": "dotenv"
+  },
+
+  "search.exclude": {
+    "**/.git": true
+  }
+}

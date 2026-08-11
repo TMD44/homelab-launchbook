@@ -1,0 +1,41 @@
+# Configuration for .github/workflows/validate-links.yml.
+# Checks internal and external links in every Markdown file in the repository.
+
+verbose = "info"
+no_progress = true
+
+# Reuse recent successful results to reduce repeated requests and rate limiting.
+# Treat HTTP 429 as non-fatal because it indicates transient server-side rate limiting.
+# 429 responses are excluded from the cache below, so they are checked again next run.
+accept = ["100..=103", "200..=299", "429"]
+cache = true
+max_cache_age = "1d"
+cache_exclude_status = "429, 500.."
+
+# Keep external checks reliable without sending excessive parallel requests.
+timeout = 30
+max_retries = 3
+max_redirects = 10
+max_concurrency = 4
+host_concurrency = 2
+
+# Include Markdown files under hidden and ignored directories.
+hidden = true
+no_ignore = true
+
+# Check GitHub-style Markdown heading anchors, but ignore URLs in code examples.
+include_fragments = "anchor-only"
+include_verbatim = false
+include_mail = false
+
+# Local homelab addresses cannot be reached from GitHub-hosted runners.
+exclude_all_private = true
+
+# Ignore documentation-only placeholder domains.
+exclude = [
+  '^https?://([^.]+\.)*example\.com([/:?#]|$)',
+  '^https?://([^.]+\.)*example\.org([/:?#]|$)',
+  '^https?://[^/:?#]+\.test([/:?#]|$)',
+  '^https?://[^/:?#]+\.invalid([/:?#]|$)',
+  '^https://www\.powermonitor\.software/?$',
+]

@@ -1,0 +1,10 @@
+# Configuration for .github/workflows/validate-workflows.yml.
+#
+# actionlint only discovers configuration from .github/actionlint.yaml or
+# .github/actionlint.yml. The workflow copies this file to that expected
+# location in the temporary runner workspace before linting.
+#
+# Keep this configuration minimal. Add path-specific ignore expressions only
+# after confirming that a reported problem is a genuine false positive.
+
+paths: {}
