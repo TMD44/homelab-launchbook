@@ -1,6 +1,6 @@
 # GitHub Actions Tools
 
-Validation and automation workflows live in `.github/workflows/`. Their supporting configuration and helper files live in `.github/actions/`.
+Validation and automation workflows live in `.github/workflows/`. Their supporting configuration and helper files live in `.github/actions/`. See [Actions tab](https://github.com/TMD44/homelab-launchbook/actions) for more information.
 
 All validators check their **full configured scope on every run**, not only changed files.
 
