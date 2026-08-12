@@ -34,4 +34,4 @@ Open the **[Architecture](Initial%20Setup/0.1%20Architecture.md)** chapter for t
 
 If you spot an error, outdated information, or a missing step, [open an issue](https://github.com/TMD44/homelab-launchbook/issues) or [submit a pull request](https://github.com/TMD44/homelab-launchbook/pulls). You can also submit a pull request to add a new service to the Application Library.
 
-Join our [Discord server](https://discord.gg/TODO) to ask questions, share your homelab, and discuss ideas with the community.
+Join our [Discord server](TODO.md) to ask questions, share your homelab, and discuss ideas with the community.
