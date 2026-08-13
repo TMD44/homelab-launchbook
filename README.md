@@ -1,6 +1,6 @@
 # **Homelab Launchbook**: The Ultimate Homelab Guide
 
-Homelab Launchbook is a practical, step-by-step guide that takes you from a bare server to a dependable self-hosting environment. We begin with the foundations: Proxmox VE, Docker in isolated LXC containers with centralized Docker management, private HTTPS access, monitoring, notifications and backups. Once the foundations are in place, that's where the real fun begins, deploying various applications: media, image and game servers, home automation, personal clouds, developer and AI tools are just the tip of the iceberg. Consider yourself warned: this is a rabbit hole you won't ever want to climb out of.
+Homelab Launchbook is a practical, step-by-step guide that takes you from a bare server to a dependable self-hosting environment. We begin with the foundations: Proxmox VE, Docker in isolated LXC containers with centralized Docker management, private HTTPS access, monitoring, notifications and backups. Once the foundations are in place, that's where the real fun begins, deploying various applications: media, image and game servers, home automation, personal clouds, developer and AI tools are just the tip of the iceberg. **Consider yourself warned: this is a rabbit hole you won't ever want to climb out of.**
 
 The guide favors **free**, **open-source**, **lightweight**, and **actively maintained** tools and applications. The goal is not to build the largest possible stack, but to create a clear, low-maintenance setup that you understand and can extend with confidence.
 
