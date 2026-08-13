@@ -1,6 +1,6 @@
 # GitHub Actions Tools
 
-Validation and automation workflows live in `.github/workflows/`. Their supporting configuration and helper files live in `.github/actions/`. See [Actions tab](https://github.com/TMD44/homelab-launchbook/actions) for more information.
+Validation and automation workflows live in `.github/workflows/`. Their supporting configuration and helper files live in `.github/actions/`.
 
 All validators check their **full configured scope on every run**, not only changed files.
 
@@ -50,6 +50,14 @@ This README provides a high-level overview. The workflow files and their tool-sp
 | Automation | What it checks | Scope | Runs | Output |
 | ------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
 | **Versions** | Application Library service versions | Configured services and the generated `## Versions` section | **Sunday 04:17 Europe/Budapest** + manual | Creates or updates a PR when changes are needed and enables auto-merge |
+
+### Required setup for `Versions` automation
+
+The `automation-application-library-versions.yml` workflow requires the following one-time GitHub configuration:
+
+1. Create a **fine-grained personal access token** under **Profile → Settings → Developer settings → Personal access tokens → Fine-grained tokens**. Limit it to the `homelab-launchbook` repository and grant only **Contents: Read and write** and **Pull requests: Read and write**.
+2. Add the token under **Repository → Settings → Secrets and variables → Actions → Secrets → New repository secret** with the exact name `AUTOMATION_APPLICATION_LIBRARY_VERSIONS_TOKEN`.
+3. Enable **Allow GitHub Actions to create and approve pull requests** under **Settings → Actions → General → Workflow permissions**, and **Allow auto-merge** under **Settings → General → Pull Requests**.
 
 ## Reporting
 
