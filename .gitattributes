@@ -1,0 +1,7 @@
+# Use LF line endings for text files.
+* text=auto eol=lf
+
+# Treat images and PDFs as binary files.
+*.png binary
+*.jpg binary
+*.pdf binary

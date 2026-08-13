@@ -1,0 +1,40 @@
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+!.env.template
+*.env.local
+secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+acme.json
+
+# Local Python files
+__pycache__/
+*.py[cod]
+.ruff_cache/
+.venv/
+
+# Generated validation reports and caches
+/.lycheecache
+/compose-validation-report.md
+/documentation-link-report.md
+/ruff-format-results.log
+/ruff-lint-results.log
+/secret-scan-report.json
+/secret-scan-report.md
+/workflow-lint-report.md
+
+# IDE, OS, and editor files
+.idea/
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*~
+
+# Local folders for ignored files
+/_IGNORED/
