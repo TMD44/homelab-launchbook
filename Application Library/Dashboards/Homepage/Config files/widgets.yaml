@@ -1,0 +1,27 @@
+# ===============================================
+# - File: Homepage/widgets.yaml
+# - Last modified: 2026.03.05.
+# - Summary: Homepage top-bar widgets.
+# ===============================================
+- greeting:
+    text_size: xl
+    text: "Homelab"
+
+#- resources:
+#    cpu: true
+#    memory: true
+#    disk: /
+#    uptime: true
+
+- search:
+    provider: google
+    focus: true
+    showSearchSuggestions: true
+    target: _blank
+
+- datetime:
+    text_size: xl
+    locale: en-US
+    format:
+      timeStyle: short
+      dateStyle: medium

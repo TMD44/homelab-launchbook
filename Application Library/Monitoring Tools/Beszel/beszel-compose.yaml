@@ -1,0 +1,29 @@
+# ===============================================
+# - File: beszel-compose.yaml
+# - Last modified: 2026.09.02.
+# - Summary: Central Beszel Hub.
+# ===============================================
+services:
+  beszel:
+    container_name: beszel
+    image: henrygd/beszel:latest # Non-critical service; "latest" is acceptable to simplify updates.
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "8090:8090"
+    devices:
+      - /dev/dri/card0:/dev/dri/card0
+      - /dev/dri/renderD128:/dev/dri/renderD128
+    environment:
+      GPU_COLLECTOR: intel_gpu_top
+      APP_URL: "https://beszel.<MY-DOMAIN>.com"
+      TZ: Europe/Budapest
+    volumes:
+      - /BESZEL/data:/beszel_data
+      - /BESZEL/socket:/beszel_socket
+    healthcheck:
+      test: ["CMD", "/beszel", "health", "--url", "http://127.0.0.1:8090"]
+      start_period: 10s
+      interval: 120s
+      timeout: 5s

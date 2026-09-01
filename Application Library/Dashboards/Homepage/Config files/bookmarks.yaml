@@ -1,0 +1,19 @@
+# ===============================================
+# - File: Homepage/bookmarks.yaml
+# - Last modified: 2026.09.02.
+# - Summary: Homepage bookmarks.
+# ===============================================
+- Developer:
+    - GitHub:
+        - abbr: GH
+          href: https://github.com/
+
+- Social:
+    - Reddit:
+        - abbr: RE
+          href: https://reddit.com/
+
+- Entertainment:
+    - YouTube:
+        - abbr: YT
+          href: https://youtube.com/

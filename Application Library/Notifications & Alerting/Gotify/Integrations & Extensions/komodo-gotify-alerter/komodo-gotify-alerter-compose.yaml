@@ -1,0 +1,19 @@
+# ===============================================
+# - File: komodo-gotify-alerter-compose.yaml
+# - Last modified: 2026.09.02.
+# - Summary: Private Komodo Custom Alerter receiver for Gotify.
+# ===============================================
+services:
+  komodo-gotify-alerter:
+    container_name: komodo-gotify-alerter
+    image: foxxmd/komodo-gotify-alerter:latest
+    restart: unless-stopped
+    env_file:
+      - ./komodo-gotify-alerter.env # In Komodo: ./.env
+    networks:
+      - komodo_default
+
+networks:
+  komodo_default:
+    name: komodo_default
+    external: true

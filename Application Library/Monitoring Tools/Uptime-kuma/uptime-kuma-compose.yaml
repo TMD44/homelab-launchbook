@@ -1,0 +1,26 @@
+# ===============================================
+# - File: uptime-kuma-compose.yaml
+# - Last modified: 2026.09.02.
+# - Summary: Uptime Kuma monitoring UI.
+# - Database: SQLite persisted under /UPTIMEKUMA/data.
+# ===============================================
+services:
+  uptime-kuma:
+    container_name: uptime-kuma
+    image: louislam/uptime-kuma:latest # Non-critical service; "latest" is acceptable to simplify updates.
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "3001:3001"
+    environment:
+      TZ: Europe/Budapest
+      UMASK: 0022
+    volumes:
+      - /UPTIMEKUMA/data:/app/data
+    healthcheck:
+      test: ["CMD", "extra/healthcheck"]
+      start_period: 180s
+      interval: 60s
+      timeout: 30s
+      retries: 5

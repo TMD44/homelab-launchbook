@@ -1,0 +1,38 @@
+# ===============================================
+# - File: homepage-code-server-compose.yaml
+# - Last modified: 2026.08.04.
+# - Summary: Code-Server workspace for editing Homepage configuration files.
+# ===============================================
+services:
+  code-server:
+    container_name: homepage_code_server
+    image: lscr.io/linuxserver/code-server:latest # Non-critical service; "latest" is acceptable to simplify updates
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - 8443:8443
+    environment:
+      PWA_APPNAME: homepage_code_server
+      PROXY_DOMAIN: code.home.<MY-DOMAIN>.com
+      PUID: 0
+      PGID: 0
+      TZ: Europe/Budapest
+      DEFAULT_WORKSPACE: "/config/workspace"
+    volumes:
+      - /CODESERVER/config:/config
+      # Pass editable config files individually instead whole folders, other should be Read-Only
+      - /HOMEPAGE/config:/config/workspace/HOMEPAGE/config
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fksS https://127.0.0.1:8443/healthz >/dev/null || curl -fsS http://127.0.0.1:8443/healthz >/dev/null"]
+      start_period: 30s
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+        - homepage-net
+
+networks:
+  homepage-net:
+    name: homepage-net
+    external: true

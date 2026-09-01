@@ -1,0 +1,33 @@
+# ===============================================
+# - File: Homepage/settings.yaml
+# - Last modified: 2026.09.02.
+# - Summary: Homepage UI settings.
+# ===============================================
+title: "Homelab"
+startUrl: "https://homepage.<MY-DOMAIN>.com"
+target: _blank
+disableIndexing: true
+
+theme: dark
+color: slate
+
+statusStyle: "dot"
+useEqualHeights: true
+hideVersion: false
+layout:
+  Infrastructure:
+    style: row
+    columns: 3
+    icon: mdi-server
+  Core services:
+    style: row
+    columns: 3
+    icon: mdi-docker
+  Monitoring:
+    style: row
+    columns: 3
+    icon: mdi-chart-line
+  Apps:
+    style: row
+    columns: 3
+    icon: mdi-application

@@ -1,0 +1,25 @@
+# ===============================================
+# - File: myspeed-compose.yaml
+# - Last modified: 2026.08.04.
+# - Summary: MySpeed (internet speedtest tracking + analytics)
+# - Notes:
+#   - Persist /myspeed/data to keep history across restarts/upgrades.
+# ===============================================
+services:
+  myspeed:
+    container_name: myspeed
+    # Upstream documents the untagged image as its stable channel.
+    image: germannewsmaker/myspeed # Non-critical service; "latest" is acceptable to simplify updates.
+    restart: always
+    ports:
+      - "5216:5216"
+    environment:
+      TZ: Europe/Budapest
+    volumes:
+      - /MYSPEED/data:/myspeed/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:5216/ >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
