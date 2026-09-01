@@ -1,0 +1,30 @@
+# ===============================================
+# - File: gotify-compose.yaml
+# - Last modified: 2026.09.02.
+# - Summary: Gotify notification server.
+# - Notes:
+#   - Port 8080 is the private Traefik upstream and local health-check path.
+#   - The bootstrap password secret is used only when Gotify creates a new database.
+# ===============================================
+services:
+  gotify:
+    container_name: gotify
+    image: gotify/server:${VERSION}
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      TZ: ${TIMEZONE}
+      GOTIFY_DEFAULTUSER_NAME: ${GOTIFY_DEFAULTUSER_NAME}
+      GOTIFY_DEFAULTUSER_PASS: ${GOTIFY_DEFAULTUSER_PASS}
+      GOTIFY_REGISTRATION: "false"
+      GOTIFY_SERVER_SECURECOOKIE: "true"
+      GOTIFY_SERVER_TRUSTEDPROXIES: 192.168.0.102/32 # Traefik LXC IP address
+    volumes:
+      - /GOTIFY/data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1/health | grep -Eq '\"health\"[[:space:]]*:[[:space:]]*\"green\"' && curl -fsS http://127.0.0.1/health | grep -Eq '\"database\"[[:space:]]*:[[:space:]]*\"green\"'"]
+      start_period: 20s
+      interval: 30s
+      timeout: 5s
+      retries: 3

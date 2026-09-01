@@ -1,0 +1,91 @@
+# ===============================================
+# - File: Homepage/services.yaml
+# - Last modified: 2026.09.02.
+# - Summary: Homepage service catalog (groups, cards, href/siteMonitor) for LXCs and host services.
+# - Notes:
+#   - Entries for later or optional services are editable examples and may not work yet.
+#   - Keep credentials out of this file; use Homepage's supported secret-variable mechanisms for widgets.
+# ===============================================
+- Infrastructure:
+    - Proxmox VE:
+        icon: si-proxmox
+        href: https://proxmox.<MY-DOMAIN>.com/
+        description: Host
+
+    - Proxmox Backup Server:
+        icon: si-proxmox
+        href: https://pbs.<MY-DOMAIN>.com/
+        description: Backup
+
+    - PowerMaster+ Local UPS Manager:
+        icon: mdi-power-plug
+        href: https://ups.<MY-DOMAIN>.com/
+        description: Optional local UPS example
+
+    - PowerMaster+ Remote UPS Manager:
+        icon: mdi-power-plug
+        href: https://upsremote.<MY-DOMAIN>.com/
+        description: Optional remote UPS example
+
+- Core services:
+    - Komodo Core:
+        icon: mdi-docker
+        href: https://komodo.<MY-DOMAIN>.com/
+        description: LXC 100
+
+    - AdGuard Home:
+        icon: si-adguard
+        href: https://adguard.<MY-DOMAIN>.com/
+        description: LXC 101
+
+    - Traefik:
+        icon: si-traefikproxy
+        href: https://traefik.<MY-DOMAIN>.com/
+        description: LXC 102
+
+    - Authelia:
+        icon: si-authelia
+        href: https://auth.<MY-DOMAIN>.com/
+        description: LXC 102
+
+    - Tailscale:
+        icon: si-tailscale
+        href: https://login.tailscale.com/admin/machines
+        description: Subnet router in LXC 103
+
+    - Gotify:
+        icon: mdi-bell
+        href: https://gotify.<MY-DOMAIN>.com/
+        description: LXC 104
+
+- Monitoring:
+    - Beszel:
+        icon: mdi-chart-line
+        href: https://beszel.<MY-DOMAIN>.com/
+        description: LXC 105
+
+    - Uptime Kuma:
+        icon: si-uptimekuma
+        href: https://uptime.<MY-DOMAIN>.com/
+        description: LXC 105
+
+    - MySpeed:
+        icon: mdi-speedometer
+        href: https://myspeed.<MY-DOMAIN>.com/
+        description: LXC 105
+
+- Apps:
+    - Nextcloud:
+        icon: si-nextcloud
+        href: https://nextcloud.<MY-DOMAIN>.com
+        description: Example for a later deployment
+
+    - Immich:
+        icon: mdi-camera
+        href: https://immich.<MY-DOMAIN>.com
+        description: Example for a later deployment
+
+    - Gitea:
+        icon: si-gitea
+        href: https://gitea.<MY-DOMAIN>.com
+        description: Example for a later deployment
