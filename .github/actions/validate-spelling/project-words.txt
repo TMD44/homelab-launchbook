@@ -40,6 +40,7 @@ EULA
 exfiltration
 fanless
 Forgejo
+FoxxMD
 FQDN
 frontends
 Gatus
@@ -49,6 +50,7 @@ GitLab
 Glances
 Gotify
 Grafana
+Harddisk
 Headscale
 Heimdall
 Homarr
@@ -97,6 +99,7 @@ offlined
 offlining
 OmniTools
 oneshot
+Ookla
 overexplaining
 OVMF
 paravirtualization
@@ -143,6 +146,7 @@ SNAT
 SNI
 SNMP
 Speedtest
+Speedtests
 SPICE
 SQLite
 SSD
@@ -177,6 +181,7 @@ UmbrelOS
 unbootable
 unconfigured
 underspecified
+UNetbootin
 unflushed
 Unraid
 unredacted
