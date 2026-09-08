@@ -1,0 +1,33 @@
+# Later-service template: install only when Homepage is deployed.
+http:
+  routers:
+    homepage:
+      entryPoints:
+        - websecure
+      rule: Host(`<MY-DOMAIN>.com`) || Host(`homepage.<MY-DOMAIN>.com`)
+      middlewares:
+        - secured@file
+      service: homepage
+
+    homepage-code:
+      entryPoints:
+        - websecure
+      rule: Host(`code.home.<MY-DOMAIN>.com`)
+      middlewares:
+        - secured-auth@file
+      service: homepage-code
+      tls:
+        certResolver: cloudflare
+
+  services:
+    homepage:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: http://192.168.0.105:3000
+
+    homepage-code:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: http://192.168.0.105:8443

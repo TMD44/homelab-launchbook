@@ -1,0 +1,17 @@
+# Later-service template: install only when Beszel is deployed.
+http:
+  routers:
+    beszel:
+      entryPoints:
+        - websecure
+      rule: Host(`beszel.<MY-DOMAIN>.com`)
+      middlewares:
+        - secured@file
+      service: beszel
+
+  services:
+    beszel:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: http://192.168.0.105:8090

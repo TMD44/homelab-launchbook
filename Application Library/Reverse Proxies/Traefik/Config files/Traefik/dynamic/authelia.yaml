@@ -1,0 +1,16 @@
+http:
+  routers:
+    authelia:
+      entryPoints:
+        - websecure
+      rule: Host(`auth.<MY-DOMAIN>.com`)
+      middlewares:
+        - secured@file
+      service: authelia
+
+  services:
+    authelia:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: http://authelia:9091

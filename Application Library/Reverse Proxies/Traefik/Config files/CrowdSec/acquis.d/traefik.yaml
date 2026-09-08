@@ -1,0 +1,6 @@
+# Read the JSON access log produced by Traefik. No Docker socket is required.
+filenames:
+  - /var/log/traefik/access.log
+labels:
+  type: traefik
+source: file

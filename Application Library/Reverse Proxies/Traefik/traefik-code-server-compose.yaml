@@ -1,0 +1,49 @@
+# ===============================================
+# - File: traefik-code-server-compose.yaml
+# - Last modified: 2026.08.04.
+# - Summary: Code-Server workspace for editing Traefik, Authelia, and CrowdSec configuration files.
+# ===============================================
+services:
+  code-server:
+    container_name: traefik_code_server
+    image: lscr.io/linuxserver/code-server:latest # Non-critical service; "latest" is acceptable to simplify updates
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      PWA_APPNAME: traefik_code_server
+      PROXY_DOMAIN: code.traefik.<MY-DOMAIN>.com
+      PUID: 0
+      PGID: 0
+      TZ: Europe/Budapest
+      DEFAULT_WORKSPACE: "/config/workspace"
+    volumes:
+      - /CODESERVER/config:/config
+      # Pass editable config files individually instead whole folders, other should be Read-Only
+      # Traefik:
+      - /TRAEFIK/traefik.yaml:/config/workspace/TRAEFIK/traefik.yaml
+      - /TRAEFIK/dynamic.yaml:/config/workspace/TRAEFIK/dynamic.yaml
+      - /TRAEFIK/secrets:/config/workspace/TRAEFIK_RO/secrets:ro
+      # Authelia:
+      - /AUTHELIA/config.yaml:/config/workspace/AUTHELIA/config.yaml
+      - /AUTHELIA/users.yaml:/config/workspace/AUTHELIA/users.yaml
+      - /AUTHELIA/notifications:/config/workspace/AUTHELIA_RO/notifications:ro
+      - /AUTHELIA/secrets:/config/workspace/AUTHELIA_RO/secrets:ro
+      # CrowdSec:
+      - /CROWDSEC/acquis.d/appsec.yaml:/config/workspace/CROWDSEC_RO/acquis.d/appsec.yaml:ro
+      - /CROWDSEC/acquis.d/traefik-docker.yaml:/config/workspace/CROWDSEC_RO/acquis.d/traefik-docker.yaml:ro
+      - /CROWDSEC/config:/config/workspace/CROWDSEC_RO/config:ro
+      - /CROWDSEC/data:/config/workspace/CROWDSEC_RO/data:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fksS https://127.0.0.1:8443/healthz >/dev/null || curl -fsS http://127.0.0.1:8443/healthz >/dev/null"]
+      start_period: 30s
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+        - traefik-net
+
+networks:
+  traefik-net:
+    name: traefik-net
+    external: true

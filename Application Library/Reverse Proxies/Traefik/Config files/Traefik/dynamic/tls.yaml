@@ -1,0 +1,12 @@
+# TLS policy and the explicitly scoped transport for self-signed LAN backends.
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+      sniStrict: true
+
+http:
+  serversTransports:
+    skipverify:
+      insecureSkipVerify: true
+      # Prefer a trusted backend certificate or a mounted private CA when possible.

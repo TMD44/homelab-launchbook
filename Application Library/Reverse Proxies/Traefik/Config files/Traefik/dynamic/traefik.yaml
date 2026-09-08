@@ -1,0 +1,11 @@
+http:
+  routers:
+    dashboard:
+      entryPoints:
+        - websecure
+      rule: >-
+        Host(`traefik.<MY-DOMAIN>.com`) &&
+        (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
+      middlewares:
+        - secured-auth@file
+      service: api@internal

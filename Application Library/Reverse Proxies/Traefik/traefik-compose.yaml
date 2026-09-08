@@ -1,0 +1,99 @@
+# ===============================================
+# - File: traefik-compose.yaml
+# - Last modified: 2026.08.04.
+# - Summary:
+#   - Traefik: reverse proxy, ACME DNS-01 (Cloudflare), dashboard, CrowdSec bouncer plugin
+#   - Authelia: SSO/MFA authentication portal
+#   - CrowdSec: security engine + LAPI (8080 internal) + AppSec listener (7422 internal)
+#   - Code-server: optional code-server for editing config files
+# - Configuration files:
+#   - Traefik: /TRAEFIK/traefik.yaml (static), /TRAEFIK/dynamic.yaml (dynamic routers/services/middlewares), /TRAEFIK/acme.json (ACME storage)
+#   - Authelia: /AUTHELIA/config.yaml, /AUTHELIA/users.yaml
+#   - CrowdSec: /CROWDSEC/acquis.d/appsec.yaml, /CROWDSEC/acquis.d/traefik-docker.yaml
+# - Notes:
+#   - Reload behavior: dynamic.yaml hot-reloads automatically, traefik.yaml (and Authelia, CrowdSec configs) require restart
+# ===============================================
+services:
+  traefik:
+    container_name: traefik
+    image: traefik:${TRAEFIK_VERSION}
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN}
+      TZ: Europe/Budapest
+    volumes:
+      - /TRAEFIK/traefik.yaml:/etc/traefik/traefik.yaml:ro
+      - /TRAEFIK/dynamic.yaml:/dynamic.yaml:ro
+      - /TRAEFIK/secrets/.crowdsecLapiKey:/.crowdsecLapiKey:ro
+      - /TRAEFIK/acme.json:/acme.json
+      - /etc/localtime:/etc/localtime:ro
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - traefik-net
+
+  authelia:
+    container_name: traefik_authelia
+    image: authelia/authelia:${AUTHELIA_VERSION}
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    command:
+      - authelia
+      - --config=/config/config.yaml
+    environment:
+      X_AUTHELIA_CONFIG_FILTERS: template
+      TZ: Europe/Budapest
+    volumes:
+      - /AUTHELIA:/config
+      - /AUTHELIA/secrets:/config/secrets:ro
+      - /etc/localtime:/etc/localtime:ro
+    healthcheck:
+      test: ["CMD", "/app/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - traefik-net
+
+  crowdsec:
+    container_name: traefik_crowdsec
+    image: crowdsecurity/crowdsec:${CROWDSEC_VERSION}
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      TZ: Europe/Budapest
+      COLLECTIONS: "crowdsecurity/traefik crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
+      PARSERS: "crowdsecurity/docker-logs"
+    secrets:
+      - bouncer_key_traefikbouncer
+    volumes:
+      - /CROWDSEC/config:/etc/crowdsec
+      - /CROWDSEC/data:/var/lib/crowdsec/data
+      - /CROWDSEC/acquis.d:/etc/crowdsec/acquis.d:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/localtime:/etc/localtime:ro
+    healthcheck:
+      test: ["CMD", "cscli", "lapi", "status"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    networks:
+      - traefik-net
+
+secrets:
+  bouncer_key_traefikbouncer: # bouncer_key_<name-of-bouncer>
+    file: /TRAEFIK/secrets/.crowdsecLapiKey
+
+networks:
+  traefik-net:
+    name: traefik-net
