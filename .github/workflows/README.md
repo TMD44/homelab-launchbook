@@ -26,7 +26,7 @@ This README provides a high-level overview. The workflow files and their tool-sp
 ╭───────────────────────── AUTOMATION ──────────────────────────╮
 
     Versions  ─→ Scheduled maintenance → PR when needed
-                  Weekly: Sunday 04:17 Europe/Budapest
+                  Monthly: 1st day 04:17 Europe/Budapest
 
 ╰───────────────────────────────────────────────────────────────╯
 ```
@@ -49,7 +49,7 @@ This README provides a high-level overview. The workflow files and their tool-sp
 
 | Automation | What it checks | Scope | Runs | Output |
 | ------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| **Versions** | Application Library service versions | Configured services and the generated `## Versions` section | **Sunday 04:17 Europe/Budapest** + manual | Creates or updates a PR when changes are needed and enables auto-merge |
+| **Versions** | Application Library service versions | Configured services and the generated `## Versions` section | **1st day of each month, 04:17 Europe/Budapest** + manual | Creates or updates a PR when changes are needed and enables auto-merge |
 
 ### Required setup for `Versions` automation
 

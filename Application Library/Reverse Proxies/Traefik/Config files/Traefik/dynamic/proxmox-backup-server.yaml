@@ -1,0 +1,17 @@
+http:
+  routers:
+    pbs:
+      entryPoints:
+        - websecure
+      rule: Host(`pbs.<MY-DOMAIN>.com`)
+      middlewares:
+        - secured@file
+      service: pbs
+
+  services:
+    pbs:
+      loadBalancer:
+        passHostHeader: true
+        serversTransport: skipverify@file
+        servers:
+          - url: https://192.168.0.15:8007

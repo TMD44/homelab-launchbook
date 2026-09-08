@@ -1,0 +1,79 @@
+# Shared security middlewares. Changes are hot-reloaded by the file provider.
+http:
+  middlewares:
+    private-clients:
+      ipAllowList:
+        sourceRange:
+          - 192.168.0.0/24
+          - 100.64.0.0/10
+
+    crowdsec:
+      plugin:
+        crowdsec-bouncer:
+          enabled: true
+          logLevel: INFO
+          crowdsecMode: stream
+          crowdsecLapiScheme: http
+          crowdsecLapiHost: crowdsec:8080
+          crowdsecLapiKeyFile: /run/secrets/crowdsec_lapi_key
+          updateIntervalSeconds: 60
+          updateMaxFailure: 0
+          streamStartupBlock: true
+          httpTimeoutSeconds: 10
+          crowdsecAppsecEnabled: true
+          crowdsecAppsecScheme: http
+          crowdsecAppsecHost: crowdsec:7422
+          crowdsecAppsecFailureBlock: true
+          crowdsecAppsecUnreachableBlock: true
+          crowdsecAppsecBodyLimit: 10485760
+          crowdsecAppsecUnreadableBodyBlock: false
+
+    authelia:
+      forwardAuth:
+        address: http://authelia:9091/api/authz/forward-auth
+        trustForwardHeader: true
+        authResponseHeaders:
+          - Remote-User
+          - Remote-Groups
+          - Remote-Email
+          - Remote-Name
+
+    security-headers:
+      headers:
+        contentTypeNosniff: true
+        referrerPolicy: strict-origin-when-cross-origin
+        stsSeconds: 31536000
+        forceSTSHeader: false
+        stsIncludeSubdomains: false
+        stsPreload: false
+        customResponseHeaders:
+          X-Robots-Tag: noindex,nofollow,nosnippet,noarchive,notranslate,noimageindex
+
+    rate-limit:
+      rateLimit:
+        average: 100
+        period: 1s
+        burst: 150
+
+    in-flight:
+      inFlightReq:
+        amount: 20
+
+    secured:
+      chain:
+        middlewares:
+          - private-clients
+          - crowdsec
+          - security-headers
+          - rate-limit
+          - in-flight
+
+    secured-auth:
+      chain:
+        middlewares:
+          - private-clients
+          - crowdsec
+          - authelia
+          - security-headers
+          - rate-limit
+          - in-flight

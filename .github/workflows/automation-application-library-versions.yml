@@ -2,7 +2,7 @@ name: "Automation: Application Library Versions"
 
 on:
   schedule:
-    - cron: "17 4 * * 0"
+    - cron: "17 4 1 * *"
       timezone: "Europe/Budapest"
 
   workflow_dispatch:

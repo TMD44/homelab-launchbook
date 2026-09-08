@@ -1,0 +1,7 @@
+# Listen for requests forwarded by the Traefik CrowdSec plugin.
+appsec_configs:
+  - crowdsecurity/appsec-default
+labels:
+  type: appsec
+listen_addr: 0.0.0.0:7422
+source: appsec

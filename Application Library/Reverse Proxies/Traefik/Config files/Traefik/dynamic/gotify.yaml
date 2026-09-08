@@ -1,0 +1,17 @@
+# Later-service template: install only when Gotify is deployed.
+http:
+  routers:
+    gotify:
+      entryPoints:
+        - websecure
+      rule: Host(`gotify.<MY-DOMAIN>.com`)
+      middlewares:
+        - secured@file
+      service: gotify
+
+  services:
+    gotify:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: http://192.168.0.104:8080

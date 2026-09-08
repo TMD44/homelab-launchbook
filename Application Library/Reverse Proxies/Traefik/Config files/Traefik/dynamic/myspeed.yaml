@@ -1,0 +1,17 @@
+# Later-service template: install only when MySpeed is deployed.
+http:
+  routers:
+    myspeed:
+      entryPoints:
+        - websecure
+      rule: Host(`myspeed.<MY-DOMAIN>.com`)
+      middlewares:
+        - secured@file
+      service: myspeed
+
+  services:
+    myspeed:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: http://192.168.0.105:5216

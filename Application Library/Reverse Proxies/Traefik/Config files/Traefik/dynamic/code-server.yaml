@@ -1,0 +1,17 @@
+# Later-service template: install only when code-server is deployed.
+http:
+  routers:
+    code-server:
+      entryPoints:
+        - websecure
+      rule: Host(`code.<MY-DOMAIN>.com`)
+      middlewares:
+        - secured-auth@file
+      service: code-server
+
+  services:
+    code-server:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: http://traefik_code_server:8443

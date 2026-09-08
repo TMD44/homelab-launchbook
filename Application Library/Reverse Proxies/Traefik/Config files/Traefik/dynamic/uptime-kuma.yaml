@@ -1,0 +1,17 @@
+# Later-service template: install only when Uptime Kuma is deployed.
+http:
+  routers:
+    uptime-kuma:
+      entryPoints:
+        - websecure
+      rule: Host(`uptime.<MY-DOMAIN>.com`)
+      middlewares:
+        - secured@file
+      service: uptime-kuma
+
+  services:
+    uptime-kuma:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: http://192.168.0.105:3001

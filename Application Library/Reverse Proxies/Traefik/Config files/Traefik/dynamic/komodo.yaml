@@ -1,0 +1,16 @@
+http:
+  routers:
+    komodo:
+      entryPoints:
+        - websecure
+      rule: Host(`komodo.<MY-DOMAIN>.com`)
+      middlewares:
+        - secured@file
+      service: komodo
+
+  services:
+    komodo:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: http://192.168.0.100:9120

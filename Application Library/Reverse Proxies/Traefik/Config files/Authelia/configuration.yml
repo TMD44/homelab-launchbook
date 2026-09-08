@@ -1,0 +1,79 @@
+# Authelia configuration. Secrets are supplied with *_FILE environment variables.
+server:
+  address: tcp://0.0.0.0:9091
+  endpoints:
+    authz:
+      forward-auth:
+        implementation: ForwardAuth
+
+theme: dark
+
+log:
+  level: info
+  keep_stdout: true
+
+identity_validation:
+  elevated_session:
+    require_second_factor: true
+  reset_password:
+    jwt_lifespan: 5 minutes
+
+totp:
+  disable: false
+  issuer: <MY-DOMAIN>.com
+
+password_policy:
+  zxcvbn:
+    enabled: true
+    min_score: 4
+
+authentication_backend:
+  file:
+    path: /config/users_database.yml
+    watch: true
+    password:
+      algorithm: argon2
+      argon2:
+        variant: argon2id
+        iterations: 3
+        memory: 65536
+        parallelism: 4
+        key_length: 32
+        salt_length: 16
+
+access_control:
+  default_policy: deny
+  rules:
+    - domain: auth.<MY-DOMAIN>.com
+      policy: bypass
+    - domain:
+        - traefik.<MY-DOMAIN>.com
+        - adguard.<MY-DOMAIN>.com
+        - code.<MY-DOMAIN>.com
+      policy: two_factor
+
+session:
+  name: authelia_session
+  same_site: lax
+  inactivity: 5m
+  expiration: 1h
+  remember_me: 1M
+  cookies:
+    - domain: <MY-DOMAIN>.com
+      authelia_url: https://auth.<MY-DOMAIN>.com
+      default_redirection_url: https://traefik.<MY-DOMAIN>.com/dashboard/
+
+regulation:
+  max_retries: 4
+  find_time: 2m
+  ban_time: 5m
+
+storage:
+  local:
+    path: /data/db.sqlite3
+
+# Bootstrap-only notification sink. Restrict this file and migrate to SMTP.
+notifier:
+  disable_startup_check: false
+  filesystem:
+    filename: /data/notification.txt

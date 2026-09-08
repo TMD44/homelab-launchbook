@@ -1,0 +1,32 @@
+http:
+  routers:
+    ups-local:
+      entryPoints:
+        - websecure
+      rule: Host(`ups.<MY-DOMAIN>.com`)
+      middlewares:
+        - secured@file
+      service: ups-local
+
+    ups-remote:
+      entryPoints:
+        - websecure
+      rule: Host(`upsremote.<MY-DOMAIN>.com`)
+      middlewares:
+        - secured@file
+      service: ups-remote
+
+  services:
+    ups-local:
+      loadBalancer:
+        passHostHeader: true
+        serversTransport: skipverify@file
+        servers:
+          - url: https://192.168.0.11:53568
+
+    ups-remote:
+      loadBalancer:
+        passHostHeader: true
+        serversTransport: skipverify@file
+        servers:
+          - url: https://192.168.0.15:53568

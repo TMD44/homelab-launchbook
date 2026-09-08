@@ -1,0 +1,9 @@
+# Store only password hashes here. Replace every placeholder before deployment.
+users:
+  <USERNAME>:
+    disabled: false
+    displayname: <DISPLAY-NAME>
+    password: <ARGON2ID-HASH>
+    email: <EMAIL>
+    groups:
+      - admins
